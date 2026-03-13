@@ -1,9 +1,20 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import Navbar from "./components/Navbar";
+import AdminPage from "./pages/AdminPage";
+import { Toaster } from "react-hot-toast";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
+import LoadingSpinner from "./components/LoadingSpinner";
 function App() {
+  const { user, checkAuth, checkingAuth } = useAuthStore();
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (checkingAuth) return <LoadingSpinner />;
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
       {/* Background gradient */}
@@ -18,18 +29,19 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route
             path="/signup"
-            element={true ? <SignupPage /> : <Navigate to="/" />}
+            element={!user ? <SignupPage /> : <Navigate to="/" />}
           />
           <Route
             path="/login"
-            element={true ? <LoginPage /> : <Navigate to="/" />}
+            element={!user ? <LoginPage /> : <Navigate to="/" />}
           />
-          {/* <Route
+          <Route
             path="/secret-dashboard"
             element={
               user?.role === "admin" ? <AdminPage /> : <Navigate to="/login" />
             }
           />
+          {/*
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route
             path="/cart"
@@ -46,7 +58,7 @@ function App() {
         </Routes>
       </div>
 
-      {/* <Toaster /> */}
+      <Toaster />
     </div>
   );
 }

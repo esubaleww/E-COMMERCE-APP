@@ -2,13 +2,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
 function LoginPage() {
-  const loading = false;
+  const { loading, login } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ email, password });
+    login({ email, password });
   };
   return (
     <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
