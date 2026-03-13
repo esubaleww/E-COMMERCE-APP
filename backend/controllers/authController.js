@@ -26,13 +26,13 @@ const storeRefreshToken = async (userId, refreshToken) => {
 const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: false, //for localhost only
+    secure: true, //for localhost only
     sameSite: "none", //if to prevent CSRF attack make it "strict"
     maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: false,
+    secure: true,
     sameSite: "none", //if to prevent CSRF attack make it "strict"
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -151,7 +151,8 @@ export const refreshToken = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    res.json(req.user);
+    const { _id, name, email, role } = req.user;
+    res.json({ _id, name, email, role });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Server error", error: error.message });
