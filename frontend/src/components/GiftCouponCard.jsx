@@ -85,7 +85,7 @@ const GiftCouponCard = () => {
         </div>
       )}
 
-      {coupon && (
+      {coupon && !isCouponApplied && (
         <div className="mt-4">
           <h3 className="text-lg font-medium text-gray-300">
             Your Available Coupon:

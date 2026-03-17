@@ -18,7 +18,9 @@ export const useProductStore = create((set, get) => ({
       }));
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.error, { id: "create_error" });
+      toast.error(error.response?.data?.error || "Failed to create product", {
+        id: "create_error",
+      });
     }
   },
   deleteProduct: async (productId) => {
@@ -33,7 +35,7 @@ export const useProductStore = create((set, get) => ({
       }));
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.error || "Faild to delete product", {
+      toast.error(error.response?.data?.error || "Failed to delete product", {
         id: "delete_error",
       });
     }
@@ -52,7 +54,10 @@ export const useProductStore = create((set, get) => ({
       }));
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.error, { id: "toggle_error" });
+      toast.error(
+        error.response?.data?.error || "Failed to toggle featured status",
+        { id: "toggle_error" },
+      );
     }
   },
   fetchAllProducts: async () => {

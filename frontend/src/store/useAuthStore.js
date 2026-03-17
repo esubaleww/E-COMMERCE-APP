@@ -61,7 +61,7 @@ export const useAuthStore = create((set, get) => ({
   },
   refreshToken: async () => {
     // Prevent multiple simultaneous refresh attempts
-    if (get().checkingAuth) return;
+    if (get().checkingAuth || get().refreshingToken) return;
 
     set({ refreshingToken: true, checkingAuth: true });
     try {
@@ -98,8 +98,11 @@ axios.interceptors.response.use(
           await refreshPromise;
         } else {
           refreshPromise = useAuthStore.getState().refreshToken();
-          await refreshPromise;
-          refreshPromise = null;
+          try {
+            await refreshPromise;
+          } finally {
+            refreshPromise = null;
+          }
         }
 
         return axios(originalRequest);

@@ -70,15 +70,20 @@ const ProductsList = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-300">
-                  ${product.price.toFixed(2)}
+                  ${(product.price ?? 0).toFixed(2)}
                 </div>
-              </td>
+              </td>{" "}
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-300">{product.category}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => toggleFeaturedProduct(product._id)}
+                  aria-label={
+                    product.isFeatured
+                      ? "Remove from featured"
+                      : "Add to featured"
+                  }
                   className={`p-1 rounded-full ${
                     product.isFeatured
                       ? "bg-yellow-400 text-gray-900"
@@ -91,6 +96,7 @@ const ProductsList = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   onClick={() => deleteProduct(product._id)}
+                  aria-label={`Delete ${product.name}`}
                   className="text-red-400 hover:text-red-300"
                 >
                   <Trash className="h-5 w-5" />

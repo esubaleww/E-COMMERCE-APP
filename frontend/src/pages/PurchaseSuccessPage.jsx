@@ -19,6 +19,7 @@ const PurchaseSuccessPage = () => {
         clearCart();
       } catch (error) {
         console.log(error);
+        setError("Failed to confirm your purchase. Please contact support.");
       } finally {
         setIsProcessing(false);
       }

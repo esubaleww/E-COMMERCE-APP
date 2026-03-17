@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
+import toast from "react-hot-toast";
 
 const categories = [
   "jeans",
@@ -37,6 +38,7 @@ const CreateProductForm = () => {
       });
     } catch {
       console.log("error creating a product");
+      toast.error("Failed to create product");
     }
   };
 

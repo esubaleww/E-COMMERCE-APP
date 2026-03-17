@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useCartStore } from "../store/useCartStore";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
+import toast from "react-hot-toast";
 
 import axios from "../lib/axios";
 
@@ -12,9 +13,6 @@ const OrderSummary = () => {
   const formattedSubtotal = subtotal.toFixed(2);
   const formattedTotal = total.toFixed(2);
   const formattedSavings = savings.toFixed(2);
-
-  console.log("total:", total);
-  console.log("ftotal:", formattedTotal);
 
   const handlePayment = async () => {
     try {
@@ -28,6 +26,9 @@ const OrderSummary = () => {
       window.location.href = session.url;
     } catch (error) {
       console.error("Payment error:", error);
+      toast.error(
+        error.response?.data?.message || "Checkout failed. Please try again.",
+      );
     }
   };
 
