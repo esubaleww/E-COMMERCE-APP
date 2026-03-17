@@ -2,7 +2,8 @@ import Product from "../models/Product.js";
 
 export const getCartProducts = async (req, res) => {
   try {
-    const products = await Product.find({ _id: { $in: req.user.cartItems } });
+    const productIds = req.user.cartItems.map((item) => item._id);
+    const products = await Product.find({ _id: { $in: productIds } });
     const cartItems = products.map((product) => {
       const item = req.user.cartItems.find(
         (cartItem) => cartItem.id === product.id,
@@ -20,6 +21,7 @@ export const addToCart = async (req, res) => {
   try {
     const { productId } = req.body;
     const user = req.user;
+    user.cartItems = (user.cartItems || []).filter((item) => item !== null);
     const existingItem = user.cartItems.find((item) => item.id === productId);
     if (existingItem) {
       existingItem.quantity += 1;

@@ -61,21 +61,14 @@ async function getDailySalesData(startDate, endDate) {
     },
     { $sort: { _id: 1 } },
   ]);
-  // [
-  //     {
-  //         _id: "2024-08-18",
-  //         sales: 12,
-  //         revenue: 1450.50
-  //     },
-  //     ... how it returns for the 7 days daily sales data
-  // ]
+
   const dateArray = getDatesInRange(startDate, endDate);
   return dateArray.map((date) => {
     const foundData = dailySalesData.find((item) => item._id === date);
     return {
-      date,
-      sales: foundData?.sales || 0,
-      revenue: foundData?.revenue || 0,
+      name: date,
+      sales: foundData?.totalSales || 0,
+      revenue: foundData?.totalRevenue || 0,
     };
   });
 }

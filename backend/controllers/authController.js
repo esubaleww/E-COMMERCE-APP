@@ -26,14 +26,14 @@ const storeRefreshToken = async (userId, refreshToken) => {
 const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: true, //for localhost only
-    sameSite: "none", //if to prevent CSRF attack make it "strict"
+    secure: ENV.NODE_ENV === "production",
+    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none", //if to prevent CSRF attack make it "strict"
+    secure: ENV.NODE_ENV === "production",
+    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax", //if to prevent CSRF attack make it "strict"
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -77,9 +77,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) {
-      res.send("user not found");
-    }
+    if (!user) return res.status(401).json({ message: "User not found" });
     if (await user.comparePassword(password)) {
       const { accessToken, refreshToken } = generateTokens(user._id);
       await storeRefreshToken(user._id, refreshToken);
@@ -109,8 +107,18 @@ export const logout = async (req, res) => {
       await redis.del(key);
     }
 
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    const isProd = ENV.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
     res.json({ message: "logged out successfully" });
   } catch (error) {
     console.error(error);
@@ -125,7 +133,14 @@ export const refreshToken = async (req, res) => {
     if (!refreshToken) {
       return res.status(401).json({ message: "No refresh token provided" });
     }
-    const decoded = jwt.verify(refreshToken, ENV.REFRESH_TOKEN_SECRET);
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, ENV.REFRESH_TOKEN_SECRET);
+    } catch {
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired refresh token" });
+    }
     const storedToken = await redis.get(`refresh_token:${decoded.userId}`);
 
     if (storedToken !== refreshToken) {
@@ -138,11 +153,12 @@ export const refreshToken = async (req, res) => {
     );
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, //for localhost only
-      sameSite: "none", //if to prevent CSRF attack make it "strict"
+      secure: ENV.NODE_ENV === "production",
+      sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 15 * 60 * 1000,
     });
-    res.json({ message: "Token refreshed successfully" });
+    const user = await User.findById(decoded.userId).select("-password");
+    res.json({ message: "Token refreshed successfully", user });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Server error", error: error.message });
