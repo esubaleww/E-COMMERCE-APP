@@ -9,7 +9,7 @@ export const getCoupon = async (req, res) => {
     res.json(coupon || null);
   } catch (error) {
     console.log("Error in getCoupon controller:", error.message);
-    res.status(500).json({ message: "Server errror:", error: error.message });
+    res.status(500).json({ message: "Server error:", error: error.message });
   }
 };
 
@@ -32,7 +32,7 @@ export const validateCoupon = async (req, res) => {
     res.json({
       message: "coupon is valid",
       code: coupon.code,
-      discountPersentage: coupon.discountPercentage,
+      discountPercentage: coupon.discountPercentage,
     });
   } catch (error) {
     console.log("Error in validateCoupon controller:", error.message);

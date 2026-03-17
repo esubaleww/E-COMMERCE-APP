@@ -23,9 +23,9 @@ export const getFeaturedProducts = async (req, res) => {
     if (!featureProducts) {
       return res.status(404).json({ message: "No featured products found" });
     }
-    await redis.set("featured_products", JSON.parse(featureProducts));
+    await redis.set("featured_products", JSON.stringify(featureProducts));
 
-    res.json({ featureProducts });
+    res.json(featureProducts);
   } catch (error) {
     console.log("Error in getFeaturedProducs controller:", error.message);
     res.status(500).json({ message: "Server error:", error: error.message });
@@ -47,18 +47,16 @@ export const createProduct = async (req, res) => {
       name,
       description,
       price,
-      image: cloudinaryResponse?.secure_url
-        ? cloudinaryResponse.secure_url
-        : "",
       category,
+      image: cloudinaryResponse?.secure_url || "",
     });
+
     res.status(201).json(product);
   } catch (error) {
-    console.log("Error in createProduct controller:", error.message);
-    res.status(500).json({ message: "Server error:", error: error.message });
+    console.error("Error in createProduct controller:", error.message);
+    res.status(500).json({ message: "Server error: " + error.message });
   }
 };
-
 export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -69,7 +67,6 @@ export const deleteProduct = async (req, res) => {
       const publicId = product.image.split("/").pop().split(".")[0];
       try {
         await cloudinary.uploader.destroy(`products/${publicId}`);
-        console.log("deleted image from cloudinary");
       } catch (error) {
         console.log("Error deleting image from cloudinary:", error);
       }
@@ -105,10 +102,10 @@ export const getRecomendedProducts = async (req, res) => {
 };
 
 export const getProductsByCategory = async (req, res) => {
-  const { category } = req.params.category;
+  const { category } = req.params;
   try {
     const products = await Product.find({ category });
-    res.json(products);
+    res.json({ products });
   } catch (error) {
     console.log("Error in getProductsByCategory controller:", error.message);
     res.status(500).json({ message: "Server error:", error: error.message });
