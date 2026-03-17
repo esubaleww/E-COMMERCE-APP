@@ -74,7 +74,7 @@ export const useProductStore = create((set, get) => ({
   },
 
   getProductsByCategory: async (category) => {
-    set({ loading: true });
+    set({ loading: true, products: [] });
     try {
       const res = await axios.get(`/products/category/${category}`);
       set({ products: res.data.products, loading: false });
