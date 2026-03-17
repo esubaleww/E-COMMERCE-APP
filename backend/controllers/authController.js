@@ -22,18 +22,18 @@ const storeRefreshToken = async (userId, refreshToken) => {
     7 * 24 * 60 * 60,
   );
 };
-
+const isProd = ENV.NODE_ENV === "production";
 const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: ENV.NODE_ENV === "production",
-    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: ENV.NODE_ENV === "production",
-    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax", //if to prevent CSRF attack make it "strict"
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax", //if to prevent CSRF attack make it "strict"
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -107,8 +107,6 @@ export const logout = async (req, res) => {
       await redis.del(key);
     }
 
-    const isProd = ENV.NODE_ENV === "production";
-
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: isProd,
@@ -158,7 +156,7 @@ export const refreshToken = async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
     const user = await User.findById(decoded.userId).select("-password");
-    res.json({ message: "Token refreshed successfully", user });
+    res.json({ message: "Token refreshed successfully", user, accessToken });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Server error", error: error.message });

@@ -27,23 +27,22 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axios.post("/auth/signup", { name, email, password });
       set({ user: res.data, loading: false });
-      toast.success("Registerd successfully");
+      toast.success("Registered successfully");
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || "An error occured");
+      toast.error(error.response?.data?.message || "An error occurred");
     }
   },
 
   login: async ({ email, password }) => {
     set({ loading: true });
-
     try {
       const res = await axios.post("/auth/login", { email, password });
       set({ user: res.data, loading: false });
       toast.success("Logged in successfully");
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || "An error occured");
+      toast.error(error.response?.data?.message || "An error occurred");
     }
   },
 
@@ -54,30 +53,40 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Logged out successfully", { id: "logout_success" });
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "An error occured during logout",
+        error.response?.data?.message || "An error occurred during logout",
         { id: "logout_error" },
       );
     }
   },
+
   refreshToken: async () => {
-    // Prevent multiple simultaneous refresh attempts
-    if (get().checkingAuth || get().refreshingToken) return;
+    if (get().refreshingToken) return;
 
     set({ refreshingToken: true, checkingAuth: true });
+
     try {
       const response = await axios.post("/auth/refresh-token");
+
       set({
         user: response.data.user,
         checkingAuth: false,
         refreshingToken: false,
-      }); // <-- update user
+      });
+
+      axios.defaults.headers.common["Authorization"] =
+        `Bearer ${response.data.accessToken}`;
+
       return response.data;
     } catch (error) {
-      set({ user: null, checkingAuth: false, refreshingToken: false });
+      if (get().user) set({ user: null });
+
+      set({ checkingAuth: false, refreshingToken: false });
+
       throw error;
     }
   },
 }));
+
 // Axios interceptor for token refresh
 let refreshPromise = null;
 
@@ -108,7 +117,10 @@ axios.interceptors.response.use(
         return axios(originalRequest);
       } catch (refreshError) {
         refreshPromise = null;
-        useAuthStore.getState().logout();
+        // Only logout if user was previously logged in
+        if (useAuthStore.getState().user) {
+          useAuthStore.getState().logout();
+        }
         return Promise.reject(refreshError);
       }
     }

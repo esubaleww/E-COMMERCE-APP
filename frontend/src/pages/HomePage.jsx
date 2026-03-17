@@ -10,6 +10,8 @@ const categories = [
   { href: "/jackets", name: "Jackets", imageUrl: "/jackets.avif" },
   { href: "/suits", name: "Suits", imageUrl: "/suits.webp" },
   { href: "/bags", name: "Bags", imageUrl: "/bags.webp" },
+  { href: "/watches", name: "Watches", imageUrl: "/watches.avif" },
+  { href: "/hats", name: "Hats", imageUrl: "/hats.avif" },
 ];
 
 function HomePage() {
